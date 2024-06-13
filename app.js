@@ -35,6 +35,34 @@ app.post("/signup",async(req,res) => {
     
 })
 
+
+//signIn API
+app.post("/signin", (req,res) => {
+    let input = req.body
+    blogmodel.find({"email":req.body.email}).then(              //check username exists or not
+        (response) => {
+            if (response.length>0) {                            //if length of username is greater than 0 acc exists
+                let dbPassword = response[0].password
+                console.log(dbPassword)
+                bcrypt.compare(input.password,dbPassword,(error,isMatch) => {       //check password matches(compare is a function in bcrypt)
+                    if (isMatch) {
+                        res.json({"status":"success","userId":response[0]._id})     //if password is equal then the userid of the user is also saved to understand which user is logged in
+                    } else {
+                        res.json({"status":"incorrect password"})
+                        
+                    }
+                })
+            } else {
+                res.json({"Status":"User no found"})
+                    
+            }
+        }
+    ).catch()
+
+})
+
+
+
 app.listen(8080,() => {
     console.log("Server Started")
 })
