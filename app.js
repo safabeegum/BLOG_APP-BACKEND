@@ -2,7 +2,7 @@ const express = require("express")
 const mongoose = require("mongoose")
 const cors = require("cors")
 const bcrypt = require("bcryptjs")
-
+const jwt = require("jsonwebtoken")
 const {blogmodel} = require("./models/blog")
 
 
@@ -46,7 +46,14 @@ app.post("/signin", (req,res) => {
                 console.log(dbPassword)
                 bcrypt.compare(input.password,dbPassword,(error,isMatch) => {       //check password matches(compare is a function in bcrypt)
                     if (isMatch) {
-                        res.json({"status":"success","userId":response[0]._id})     //if password is equal then the userid of the user is also saved to understand which user is logged in
+                        jwt.sign({email:input.email}, "blog-app", {expiresIn:"1d"}, (error,token) => {
+                            if (error) {
+                                res.json({"status":"unable to create token"})
+                            } else {
+                                res.json({"status":"success","userId":response[0]._id,"token":token})
+                            }
+                        })
+                             //if password is equal then the userid of the user is also saved to understand which user is logged in
                     } else {
                         res.json({"status":"incorrect password"})
                         
